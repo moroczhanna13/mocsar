@@ -55,11 +55,23 @@ export default function Lobby({ onJoined }: Props) {
 
   function create(e: FormEvent) {
     e.preventDefault();
+    if (!nickname.trim()) {
+      setError('Először add meg a beceneved.');
+      return;
+    }
     void run(() => api.createRoom(nickname));
   }
 
   function join(e: FormEvent) {
     e.preventDefault();
+    if (!nickname.trim()) {
+      setError('Először add meg a beceneved.');
+      return;
+    }
+    if (!code.trim()) {
+      setError('Írd be a szobakódot, amit a szoba gazdája kapott.');
+      return;
+    }
     void run(() => api.joinRoom(code.trim().toUpperCase(), nickname));
   }
 
@@ -68,7 +80,7 @@ export default function Lobby({ onJoined }: Props) {
       <section className="card-panel">
         <h2>Belépés</h2>
         <label>
-          Becenév
+          Becenév (kötelező, a szobában egyedi)
           <input
             value={nickname}
             maxLength={32}
@@ -78,7 +90,7 @@ export default function Lobby({ onJoined }: Props) {
           />
         </label>
         <form onSubmit={create} className="row">
-          <button type="submit" disabled={busy || !nickname.trim()}>
+          <button type="submit" disabled={busy}>
             Új szoba
           </button>
         </form>
@@ -89,7 +101,7 @@ export default function Lobby({ onJoined }: Props) {
             placeholder="Szobakód"
             maxLength={8}
           />
-          <button type="submit" disabled={busy || !nickname.trim() || !code.trim()}>
+          <button type="submit" disabled={busy}>
             Csatlakozás
           </button>
         </form>
