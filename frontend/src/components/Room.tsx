@@ -20,6 +20,7 @@ export default function Room({ session, onLeave }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string[]>([]);
   const [stats, setStats] = useState<PlayerStats[]>([]);
+  const [roomLost, setRoomLost] = useState(false);
   const socket = useRef<GameSocket | null>(null);
 
   const handleMessage = useCallback(
@@ -32,11 +33,21 @@ export default function Room({ session, onLeave }: Props) {
           onLeave();
           return;
         }
+        if (msg.message.startsWith('Nincs ilyen szoba') || msg.message.startsWith('Érvénytelen játékos')) {
+          setRoomLost(true);
+          return;
+        }
         setError(msg.message);
       }
     },
     [onLeave],
   );
+
+  // Az ingyenes hoszt HTTP-forgalom nélkül elaltatja a szervert; a WebSocket nem számít. 4 percenként ping.
+  useEffect(() => {
+    const timer = setInterval(() => api.ping().catch(() => undefined), 4 * 60 * 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     socket.current = connect(session.code, session.token, handleMessage, setConnected);
@@ -45,7 +56,7 @@ export default function Room({ session, onLeave }: Props) {
       .me(session.code, session.token)
       .then(setView)
       .catch((e: Error) => {
-        if (e.message.startsWith('Nincs ilyen szoba') || e.message.startsWith('Érvénytelen')) onLeave();
+        if (e.message.startsWith('Nincs ilyen szoba') || e.message.startsWith('Érvénytelen')) setRoomLost(true);
         else setError(e.message);
       });
     return () => socket.current?.close();
@@ -123,6 +134,21 @@ export default function Room({ session, onLeave }: Props) {
     } catch (e) {
       setError((e as Error).message);
     }
+  }
+
+  if (roomLost) {
+    return (
+      <main className="room">
+        <section className="card-panel">
+          <h2>A szoba megszűnt</h2>
+          <p>
+            A szerver újraindult, és a zajló játékok csak a memóriájában éltek. A befejezett körök eredménye megmaradt
+            a ranglistán. Hozzatok létre új szobát.
+          </p>
+          <button onClick={onLeave}>Vissza a lobbyba</button>
+        </section>
+      </main>
+    );
   }
 
   if (!view) {

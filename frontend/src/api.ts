@@ -35,5 +35,7 @@ export const api = {
   endGame: (code: string, token: string) =>
     request<void>(`/api/rooms/${code}/end`, { method: 'POST', headers: { 'X-Player-Token': token } }),
   roomStats: (code: string) => request<PlayerStats[]>(`/api/rooms/${code}/stats`),
+  /** Könnyű HTTP-kérés, hogy az ingyenes hoszt ne altassa el a szervert játék közben. */
+  ping: () => fetch(BASE + '/actuator/health').then(() => undefined),
   globalStats: () => request<PlayerStats[]>('/api/stats'),
 };
