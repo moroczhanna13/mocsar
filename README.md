@@ -32,6 +32,8 @@ A szerver dönti el, hogy egy lépés szabályos-e. A kliens csak a saját lapja
 
 ### Fejlesztői mód (Docker nélkül, H2 memória-adatbázis)
 
+Adatbázis env-ből: `DB_URL`, `DB_USER`, `DB_PASSWORD` (nélkülük H2). Port: `PORT` (alap 8080). Engedélyezett frontend-origin: `MOCSAR_ALLOWED_ORIGINS`.
+
 ```
 mvn -q install -DskipTests
 cd mocsar-server && mvn spring-boot:run
@@ -56,6 +58,13 @@ docker compose up --build
 ```
 
 Frontend: `http://localhost:3000`, szerver: `http://localhost:8080`, adatbázis a `db` szolgáltatásban.
+
+### Ingyenes online: GitHub Pages + Render
+
+- Frontend: `https://moroczhanna13.github.io/mocsar/` (a [pages.yml](.github/workflows/pages.yml) minden `main`-re pusholt frontend-változásnál buildel és deployol). Repó Settings > Pages > Source: **GitHub Actions**.
+- Szerver: Render.com, New > **Blueprint**, ez a repó; a [render.yaml](render.yaml) ingyenes Docker web service-t hoz létre `mocsar-server` néven (`https://mocsar-server.onrender.com`). Ha Render más nevet ad, a repó Settings > Secrets and variables > Actions > Variables alatt `SERVER_URL` legyen az új cím, és a Pages workflow-t újra kell futtatni.
+- Az ingyenes Render 15 perc tétlenség után elaltatja a szervert; az első belépés ébreszti, a lobby ezt jelzi.
+- Tartós ranglista: ingyenes PostgreSQL (pl. [Neon](https://neon.tech)) adatait a Render dashboardon env-ként: `DB_URL=jdbc:postgresql://<host>/<db>?sslmode=require`, `DB_USER`, `DB_PASSWORD`. Nélkülük H2 memória-adatbázis fut.
 
 ### Tesztek
 

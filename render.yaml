@@ -1,0 +1,21 @@
+# Render.com Blueprint: ingyenes Docker web service a szervernek.
+# Render dashboard: New > Blueprint > ez a repó. A szolgáltatás címe: https://mocsar-server.onrender.com
+# (ha a név foglalt, Render utótagot ad; akkor a GitHub repó SERVER_URL változóját erre kell állítani).
+services:
+  - type: web
+    name: mocsar-server
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./mocsar-server/Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: MOCSAR_ALLOWED_ORIGINS
+        value: https://moroczhanna13.github.io
+      - key: JAVA_TOOL_OPTIONS
+        value: -Xmx320m -XX:+UseSerialGC -Xss512k
+      # Tartós ranglistához ingyenes PostgreSQL (pl. Neon) adatai a dashboardon:
+      # DB_URL=jdbc:postgresql://<host>/<db>?sslmode=require, DB_USER, DB_PASSWORD.
+      # Nélkülük H2 memória-adatbázis fut, újraindításkor a statisztika törlődik.

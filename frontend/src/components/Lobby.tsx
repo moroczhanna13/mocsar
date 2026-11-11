@@ -15,9 +15,29 @@ export default function Lobby({ onJoined }: Props) {
   const [busy, setBusy] = useState(false);
   const [stats, setStats] = useState<PlayerStats[]>([]);
   const [rulesOpen, setRulesOpen] = useState(false);
+  const [server, setServer] = useState<'waking' | 'up' | 'down'>('waking');
 
+  // Az ingyenes hoszton a szerver tétlenség után elalszik; az első kérés felébreszti (akár 1 perc).
   useEffect(() => {
-    api.globalStats().then(setStats).catch(() => setStats([]));
+    let cancelled = false;
+    const attempt = (left: number) => {
+      api
+        .globalStats()
+        .then((rows) => {
+          if (cancelled) return;
+          setStats(rows);
+          setServer('up');
+        })
+        .catch(() => {
+          if (cancelled) return;
+          if (left > 0) setTimeout(() => attempt(left - 1), 5000);
+          else setServer('down');
+        });
+    };
+    attempt(18);
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function run(action: () => Promise<{ code: string; playerId: string; token: string }>) {
@@ -74,6 +94,8 @@ export default function Lobby({ onJoined }: Props) {
           </button>
         </form>
         {error && <p className="error">{error}</p>}
+        {server === 'waking' && <p className="hint">A szerver ébredezik, ez az ingyenes hoszton akár egy percig is eltarthat…</p>}
+        {server === 'down' && <p className="error">A szerver nem érhető el. Próbáld újra később.</p>}
         <p className="hint">7–15 játékos, két pakli, joker nélkül. A hiányzó helyekre botot is lehet ültetni.</p>
         <button type="button" className="secondary" onClick={() => setRulesOpen(true)}>
           Szabályok
