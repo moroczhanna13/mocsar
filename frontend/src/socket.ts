@@ -11,6 +11,9 @@ export interface GameSocket {
 function wsUrl(): string {
   const configured = import.meta.env.VITE_WS_URL as string | undefined;
   if (configured) return configured;
+  // ha a REST máshol fut (pl. GitHub Pages + Render), a WebSocket is oda megy
+  const api = import.meta.env.VITE_API_URL as string | undefined;
+  if (api) return api.replace(/^http/, 'ws').replace(/\/$/, '') + '/ws';
   const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
   return `${protocol}://${location.host}/ws`;
 }

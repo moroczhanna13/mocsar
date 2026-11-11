@@ -37,7 +37,6 @@ jobs:
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
           VITE_API_URL: ${{ vars.SERVER_URL || 'https://mocsar-server.onrender.com' }}
-          VITE_WS_URL: ${{ format('{0}/ws', replace(replace(vars.SERVER_URL || 'https://mocsar-server.onrender.com', 'https://', 'wss://'), 'http://', 'ws://')) }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
