@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: mocsar-server
+  datasource:
+    url: jdbc:h2:mem:mocsar;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+mocsar:
+  bot-delay-ms: 700
+  room-code-length: 5
+  allowed-origins: http://localhost:5173,http://localhost:3000
+
+---
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/mocsar}
+    username: ${DB_USER:mocsar}
+    password: ${DB_PASSWORD:mocsar}
+    driver-class-name: org.postgresql.Driver

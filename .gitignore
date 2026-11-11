@@ -1,0 +1,11 @@
+target/
+node_modules/
+frontend/dist/
+*.log
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.db
+*.mv.db
+*.trace.db
